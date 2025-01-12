@@ -1,0 +1,77 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO Collection Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>LEGO Collection Manager</h1>
+        <nav>
+            <button onclick="showTab('collection')" class="tab-btn active">My Collection</button>
+            <button onclick="showTab('wishlist')" class="tab-btn">Wishlist</button>
+            <button onclick="showForm()" class="add-btn">Add Set</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="collection" class="tab-content active">
+            <h2>My Collection</h2>
+            <div class="sets-grid" id="owned-sets"></div>
+        </div>
+
+        <div id="wishlist" class="tab-content">
+            <h2>Wishlist</h2>
+            <div class="sets-grid" id="wanted-sets"></div>
+        </div>
+
+        <div id="set-form" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add/Edit LEGO Set</h2>
+                <form id="lego-form" onsubmit="handleSubmit(event)">
+                    <input type="hidden" id="set-id">
+                    <div class="form-group">
+                        <label for="set-number">Set Number:</label>
+                        <input type="text" id="set-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="piece-count">Piece Count:</label>
+                        <input type="number" id="piece-count">
+                    </div>
+                    <div class="form-group">
+                        <label for="theme">Theme:</label>
+                        <input type="text" id="theme">
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year Released:</label>
+                        <input type="number" id="year">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="status" value="owned" required>
+                            I own this set
+                        </label>
+                        <label>
+                            <input type="radio" name="status" value="wanted" required>
+                            I want this set
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Save</button>
+                        <button type="button" onclick="closeForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
