@@ -1,27 +1,74 @@
 /* static/script.js */
+const PLACEHOLDER_IMAGE = 'static/placeholder.jpg'
+
 let currentTab = 'collection';
 
 async function loadSets() {
-    const ownedResponse = await fetch('/api/sets?owned=true');
-    const wantedResponse = await fetch('/api/sets?wanted=true');
+    const response = await fetch('/api/sets');
+    const sets = await response.json();
     
-    const ownedSets = await ownedResponse.json();
-    const wantedSets = await wantedResponse.json();
+    // Populate theme filter options
+    const themes = [...new Set(sets.map(set => set.theme).filter(theme => theme))];
+    const themeSelect = document.getElementById('theme-filter');
+    themeSelect.innerHTML = '<option value="">All Themes</option>';
+    themes.sort().forEach(theme => {
+        themeSelect.innerHTML += `<option value="${theme}">${theme}</option>`;
+    });
     
-    displaySets('owned-sets', ownedSets);
-    displaySets('wanted-sets', wantedSets);
+    // Store sets in memory for filtering
+    window.allSets = sets;
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const themeFilter = document.getElementById('theme-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    
+    let filteredSets = window.allSets;
+    
+    // Apply search filter
+    if (searchTerm) {
+        filteredSets = filteredSets.filter(set => 
+            set.name.toLowerCase().includes(searchTerm) ||
+            set.set_number.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Apply theme filter
+    if (themeFilter) {
+        filteredSets = filteredSets.filter(set => set.theme === themeFilter);
+    }
+    
+    // Apply status filter
+    if (statusFilter) {
+        filteredSets = filteredSets.filter(set => 
+            statusFilter === 'owned' ? set.owned : set.wanted
+        );
+    }
+    
+    displaySets('all-sets', filteredSets);
 }
 
 function displaySets(containerId, sets) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     
+    if (sets.length === 0) {
+        container.innerHTML = '<div class="no-results">No sets found matching the selected filters</div>';
+        return;
+    }
+    
     sets.forEach(set => {
         const card = document.createElement('div');
         card.className = 'set-card';
-        const imageUrl = set.image_url || '/static/placeholder.jpg';
+        const imageUrl = set.image_url || PLACEHOLDER_IMAGE;
+        const status = set.owned ? 'Owned' : 'Wanted';
+        const statusClass = set.owned ? 'status-owned' : 'status-wanted';
+        
         card.innerHTML = `
-            <img src="${imageUrl}" alt="${set.name}" onerror="this.src='/static/placeholder.jpg'">
+            <div class="set-status ${statusClass}">${status}</div>
+            <img src="${imageUrl}" alt="${set.name}" onerror="this.src='${PLACEHOLDER_IMAGE}'">
             <div class="set-info">
                 <h3>${set.name}</h3>
                 <p>Set #: ${set.set_number}</p>
@@ -34,15 +81,6 @@ function displaySets(containerId, sets) {
         `;
         container.appendChild(card);
     });
-}
-
-function showTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    
-    document.getElementById(tab).classList.add('active');
-    document.querySelector(`button[onclick="showTab('${tab}')"]`).classList.add('active');
 }
 
 function showForm() {
@@ -126,5 +164,7 @@ async function deleteSet(setId) {
     }
 }
 
-// Load sets when the page loads
-document.addEventListener('DOMContentLoaded', loadSets);
+// Initialize correct tab on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadSets();
+});

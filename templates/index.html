@@ -11,21 +11,30 @@
     <header>
         <h1>LEGO Collection Manager</h1>
         <nav>
-            <button onclick="showTab('collection')" class="tab-btn active">My Collection</button>
-            <button onclick="showTab('wishlist')" class="tab-btn">Wishlist</button>
             <button onclick="showForm()" class="add-btn">Add Set</button>
         </nav>
     </header>
 
     <main>
-        <div id="collection" class="tab-content active">
-            <h2>My Collection</h2>
-            <div class="sets-grid" id="owned-sets"></div>
+        <div class="filters">
+            <input 
+                type="search" 
+                id="search-input" 
+                placeholder="Search sets..." 
+                oninput="applyFilters()"
+            >
+            <select id="theme-filter" onchange="applyFilters()">
+                <option value="">All Themes</option>
+            </select>
+            <select id="status-filter" onchange="applyFilters()">
+                <option value="">All Sets</option>
+                <option value="owned">Collection Only</option>
+                <option value="wanted">Wishlist Only</option>
+            </select>
         </div>
 
-        <div id="wishlist" class="tab-content">
-            <h2>Wishlist</h2>
-            <div class="sets-grid" id="wanted-sets"></div>
+        <div class="sets-container">
+            <div class="sets-grid" id="all-sets"></div>
         </div>
 
         <div id="set-form" class="modal hidden">

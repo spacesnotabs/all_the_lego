@@ -101,6 +101,7 @@ def add_set_to_database(set_data, owned=True):
             existing_set.name = set_info.get('name', existing_set.name)
             existing_set.owned = owned
             existing_set.image_url = set_info.get('set_img_url', existing_set.image_url)
+            existing_set.theme_id = set_info.get('theme_id')
             print(f"Updated set {set_num} in database")
         else:
             # Create new set
@@ -108,7 +109,7 @@ def add_set_to_database(set_data, owned=True):
                 set_number=set_num,
                 name=set_info.get('name', 'Unknown Set'),
                 piece_count=set_info.get('num_parts'),
-                theme=set_info.get('theme_id'),
+                theme_id=set_info.get('theme_id'),
                 year_released=set_info.get('year'),
                 image_url=set_info.get('set_img_url'),
                 owned=owned,
