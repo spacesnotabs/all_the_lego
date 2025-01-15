@@ -164,7 +164,116 @@ async function deleteSet(setId) {
     }
 }
 
+async function checkRebrickableStatus() {
+    try {
+        const response = await fetch('/api/rebrickable/status');
+        const data = await response.json();
+        return data.connected;
+    } catch (error) {
+        console.error('Error checking Rebrickable status:', error);
+        return false;
+    }
+}
+
+async function showRebrickableForm() {
+    const formHtml = `
+        <div class="modal-content">
+            <h2>Connect to Rebrickable</h2>
+            <form id="rebrickable-form" onsubmit="handleRebrickableSubmit(event)">
+                <div class="form-group">
+                    <label for="username">Rebrickable Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Rebrickable Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Connect</button>
+                    <button type="button" onclick="closeRebrickableForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.id = 'rebrickable-modal';
+    modal.className = 'modal active';
+    modal.innerHTML = formHtml;
+    document.body.appendChild(modal);
+}
+
+async function handleRebrickableSync() {
+    const isConnected = await checkRebrickableStatus();
+    if (!isConnected) {
+        showRebrickableForm();
+    } else {
+        // TODO: Implement actual sync logic
+        alert('Already connected to Rebrickable. Sync feature coming soon!');
+    }
+}
+
+async function handleRebrickableSubmit(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const response = await fetch('/api/rebrickable/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Successfully connected to Rebrickable!');
+            closeRebrickableForm();
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        alert('Error connecting to Rebrickable. Please try again.');
+    }
+}
+
+function closeRebrickableForm() {
+    const modal = document.getElementById('rebrickable-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Add this function to handle sync button clicks
+document.querySelector('.sync-btn').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/rebrickable/sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Sync failed');
+        }
+        
+        // Refresh the sets display
+        loadSets();
+        alert('Successfully synced with Rebrickable!');
+    } catch (error) {
+        alert('Error syncing with Rebrickable: ' + error.message);
+    }
+});
+
 // Initialize correct tab on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadSets();
+    const syncBtn = document.querySelector('.sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', handleRebrickableSync);
+    }
 });

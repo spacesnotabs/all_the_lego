@@ -1,12 +1,7 @@
 import requests
 import os
 import sys
-# Add parent directory to path so we can import app
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import db, LegoSet, app
-
-# Replace with your Rebrickable API key
 API_KEY = "13d230bf1bed61b2260826ad9397495f"
 
 def generate_user_token(api_key, username, password):
@@ -83,10 +78,12 @@ def get_sets_in_setlist(api_key, user_token, setlist_id):
         return {"error": str(e)}
 
 def add_set_to_database(set_data, owned=True):
-    """
-    Add or update a set in the database
-    """
-    with app.app_context():
+    """This function should be moved to a separate service file"""
+    from models.database import db
+    from models.lego_set import LegoSetDefinition, UserLegoSet
+    from flask import current_app
+    
+    with current_app.app_context():
         set_info = set_data.get('set', {})
         set_num = set_info.get('set_num')
         

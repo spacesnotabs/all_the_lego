@@ -9,12 +9,32 @@
 </head>
 <body>
     <header>
-        <h1>LEGO Collection Manager</h1>
         <nav>
-            <button onclick="showForm()" class="add-btn">Add Set</button>
+            <a href="/" class="nav-logo">LEGO Collection</a>
+            <div class="nav-actions">
+                {% if session.get('user_info') %}
+                    <span class="welcome-text">Welcome, {{ session.user_info.name }}</span>
+                    <button onclick="showForm()" class="add-btn">Add Set</button>
+                    <button class="sync-btn">Sync to Rebrickable</button>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-btn">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-btn">Login with Google</a>
+                {% endif %}
+            </div>
         </nav>
     </header>
 
+    {% if not session.get('user_info') %}
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Manage Your LEGO Collection</h1>
+            <p>Keep track of your LEGO sets, maintain your wishlist, and sync with Rebrickable. Join now to start organizing your brick collection!</p>
+            <a href="{{ url_for('auth.login') }}" class="nav-btn">Get Started</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if session.get('user_info') %}
     <main>
         <div class="filters">
             <input 
@@ -80,6 +100,7 @@
             </div>
         </div>
     </main>
+    {% endif %}
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
